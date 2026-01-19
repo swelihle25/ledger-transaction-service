@@ -27,7 +27,7 @@ public class Transaction {
     private BigDecimal amount;
 
     @Column(nullable = false)
-    private String transactionType;
+    private String transactionType;  // DEBIT, CREDIT
 
     @Column(nullable = false)
     private String description;
@@ -36,9 +36,23 @@ public class Transaction {
     private LocalDateTime transactionDate;
 
     @Column(nullable = false)
-    private String status;
+    private String status;   // COMPLETED, PENDING, DISPUTED
 
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        if (transactionDate == null) {
+            transactionDate = LocalDateTime.now();
+        }
+        if (status == null) {
+            status = "COMPLETED";
+        }
+    }
+
 }
+
+
