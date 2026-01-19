@@ -1,0 +1,54 @@
+package com.lihle.ledger.service;
+
+import com.lihle.ledger.dto.TransactionDTO;
+import com.lihle.ledger.entity.Transaction;
+import com.lihle.ledger.repository.TransactionRepository;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+public class TransactionService {
+
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+    public TransactionDTO createTransaction(TransactionDTO dto) {
+        Transaction transaction = new Transaction();
+        BeanUtils.copyProperties(dto, transaction);
+        Transaction saved = transactionRepository.save(transaction);
+        return convertToDTO(saved);
+    }
+
+    public List<TransactionDTO> getAllTransactions() {
+        return transactionRepository.findAll()
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public Optional<TransactionDTO> getTransactionById(Long id) {
+        return transactionRepository.findById(id)
+                .map(this::convertToDTO);
+    }
+
+    public boolean updateTransactionStatus(Long id, String status) {
+        Optional<Transaction> opt = transactionRepository.findById(id);
+        if (opt.isPresent()) {
+            Transaction transaction = opt.get();
+            transaction.setStatus(status);
+            transactionRepository.save(transaction);
+            return true;
+        }
+        return false;
+    }
+
+    private TransactionDTO convertToDTO(Transaction transaction) {
+        TransactionDTO dto = new TransactionDTO();
+        BeanUtils.copyProperties(transaction, dto);
+        return dto;
+    }
+}
