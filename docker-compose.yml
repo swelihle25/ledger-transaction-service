@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   transaction-db:
     image: postgres:15-alpine
@@ -38,3 +36,21 @@ networks:
 
 volumes:
   transaction-data:
+
+#
+#    mvn clean package
+#    # Navigate to project root (where docker-compose.yml is)
+#    cd /path/to/project-root
+#
+#    # Build and start all services
+#    docker-compose up --build
+#
+#    # Or run in detached mode (background)
+#    docker-compose up --build -d
+#
+#    # View logs
+#    docker-compose logs -f
+#
+#    # View logs for specific service
+#    docker-compose logs -f transaction-service
+#    docker-compose logs -f dispute-service
