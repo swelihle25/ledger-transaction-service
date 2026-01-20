@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  transaction-db:
+    image: postgres:15-alpine
+    container_name: transaction-db
+    environment:
+      POSTGRES_DB: transactiondb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - transaction-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  transaction-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ledger-transaction-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://transaction-db:5432/transactiondb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+    depends_on:
+      - transaction-db
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    name: microservices-network
+    driver: bridge
+
+volumes:
+  transaction-data:
