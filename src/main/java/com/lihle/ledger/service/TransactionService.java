@@ -10,6 +10,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Flow:
+ * 1. Receives DTO from controller
+ * 2. Converts DTO → Domain (using Mapper)
+ * 3. Executes business logic on Domain
+ * 4. Converts Domain → DTO (using Mapper)
+ * 5. Saves Entity via Repository
+ * 6. Converts Entity → Domain → DTO
+ * 7. Return DTO to Controller
+ * */
+
 @Service
 public class TransactionService {
 
