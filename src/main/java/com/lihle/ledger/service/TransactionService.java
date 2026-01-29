@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 public class TransactionService {
 
     @Autowired
-    private TransactionRepository transactionRepository;
+    private TransactionRepository repository;
 
     @Autowired
     private TransactionMapper mapper;
@@ -39,51 +39,44 @@ public class TransactionService {
         //1. Business logic happens (domain validates itself in constructor)
         //Domain ensures: accountNumber not empty , amount > 0 , type exists.
 
-
         //2. Convert Domain to Entity
         Transaction entity = mapper.toEntity(domain);
 
         //3. Save to database
-        Transaction saveEntity = transactionRepository.save(entity);
+        Transaction saveEntity = repository.save(entity);
 
         //4. Convert back: Entity → Domain → DTO
         TransactionDomain savedDomain = mapper.toDomain(saveEntity);
         return mapper.toDTO(savedDomain);
     }
 
-//Get All Transactions
-
-
-
-
-        Transaction transaction = new Transaction();
-        BeanUtils.copyProperties(dto, transaction);
-        Transaction saved = transactionRepository.save(transaction);
-        return convertToDTO(saved);
-    }
-
+    //Get All Transactions
     public List<TransactionDTO> getAllTransactions() {
-        return transactionRepository.findAll()
+        return repository.findAll()
                 .stream()
-                .map(this::convertToDTO)
+                .map(mapper::toDomain)
+                .map(mapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     public Optional<TransactionDTO> getTransactionById(Long id) {
-        return transactionRepository.findById(id)
-                .map(this::convertToDTO);
+        return repository.findById(id)
+                .map(mapper::toDomain)
+                .map(mapper::toDTO);
     }
 
-    public boolean updateTransactionStatus(Long id, String status) {
-        Optional<Transaction> opt = transactionRepository.findById(id);
-        if (opt.isPresent()) {
-            Transaction transaction = opt.get();
-            transaction.setStatus(status);
-            transactionRepository.save(transaction);
-            return true;
+    /**
+     * UPDATE TRANSACTION STATUS
+     *
+     * This method uses DOMAIN BEHAVIOR to change status
+     */
+
+    public boolean updateTransactionStatus(Long id, String statusString) {
+        Optional<Transaction> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) {
+            return false;
         }
-        return false;
-    }
+
 
     private TransactionDTO convertToDTO(Transaction transaction) {
         TransactionDTO dto = new TransactionDTO();
