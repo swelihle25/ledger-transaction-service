@@ -43,6 +43,16 @@ public class TransactionService {
         //2. Convert Domain to Entity
         Transaction entity = mapper.toEntity(domain);
 
+        //3. Save to database
+        Transaction saveEntity = transactionRepository.save(entity);
+
+        //4. Convert back: Entity → Domain → DTO
+        TransactionDomain savedDomain = mapper.toDomain(saveEntity);
+        return mapper.toDTO(savedDomain);
+    }
+
+//Get All Transactions
+
 
 
 
