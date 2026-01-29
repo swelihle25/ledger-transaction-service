@@ -78,9 +78,50 @@ public class TransactionService {
         }
 
 
-    private TransactionDTO convertToDTO(Transaction transaction) {
-        TransactionDTO dto = new TransactionDTO();
-        BeanUtils.copyProperties(transaction, dto);
-        return dto;
+        // 1. Convert Entity → Domain
+        TransactionDomain domain = mapper.toDomain(entityOpt.get());
+
+        //2. Use domain behavior based on status
+        TransactionDomain updatedDomain;
+        if("DISPUTED".equalsIgnoreCase(statusString)) {
+            updatedDomain = domain.markAsDisputed();  // Business logic in domain!
+        } else if ("REVERSED".equalsIgnoreCase(statusString)){
+            updatedDomain = domain.reverse();
+        } else if ("COMPLETED".equalsIgnoreCase(statusString)){
+            updatedDomain = domain.reverse();
+        } else {
+            throw new IllegalArgumentException("Invalid status:" + statusString);
+        }
+
+        //3. Convert Domain → Entity and save
+        Transaction updatedEntity = mapper.toEntity(updatedDomain);
+        updatedEntity.setId(id); // Ensure ID is preserved
+        repository.save(updatedEntity);
+
+        return true;
     }
+
+    /**
+     * GET TRANSACTIONS BY ACCOUNT
+   */
+    public List<TransactionDTO> getTransactionsByAccount(String accountNumber) {
+        return repository.findByAccountNumber(accountNumber)
+                .stream()
+                .map(mapper:: toDomain)
+                .map(mapper:: toDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * GET TRANSACTIONS BY STATUS
+     */
+    public List<TransactionDTO> getTransactionsByStatus(String status) {
+        return repository.findByStatus(status)
+                .stream()
+                .map(mapper:: toDomain)
+                .map(mapper:: toDTO)
+                .collect(Collectors.toList());
+
+    }
+
 }
