@@ -1,7 +1,9 @@
 package com.lihle.ledger.service;
 
+import com.lihle.ledger.domain.TransactionDomain;
 import com.lihle.ledger.dto.TransactionDTO;
 import com.lihle.ledger.entity.Transaction;
+import com.lihle.ledger.mapper.TransactionMapper;
 import com.lihle.ledger.repository.TransactionRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +29,23 @@ public class TransactionService {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @Autowired
+    private TransactionMapper mapper;
+
     public TransactionDTO createTransaction(TransactionDTO dto) {
+
+        TransactionDomain domain = mapper.toDomain(dto);
+
+        //1. Business logic happens (domain validates itself in constructor)
+        //Domain ensures: accountNumber not empty , amount > 0 , type exists.
+
+
+        //2. Convert Domain to Entity
+        Transaction entity = mapper.toEntity(domain);
+
+
+
+
         Transaction transaction = new Transaction();
         BeanUtils.copyProperties(dto, transaction);
         Transaction saved = transactionRepository.save(transaction);
